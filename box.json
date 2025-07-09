@@ -1,5 +1,12 @@
 {
   "files": [
     ".env.local.php"
-  ]
+  ],
+  "directories": [
+    "config",
+    "bin",
+    "src",
+    "vendor"
+  ],
+  "output": "backup.phar"
 }

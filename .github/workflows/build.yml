@@ -1,0 +1,37 @@
+name: build.yml
+on:
+  release:
+    types: ["published"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: ctype, iconv
+          tools: box
+
+      - uses: actions/checkout@v4
+
+      - name: Build env
+        shell: bash
+        run: |
+          composer install --prefer-dist --no-progress --no-dev
+          composer dump-env prod
+
+      - name: Box
+        shell: bash
+        run: box compile
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: backup.phar
+
+
