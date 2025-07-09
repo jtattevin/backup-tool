@@ -33,9 +33,9 @@ readonly class ProcessRunner
         $duration = microtime(true) - $process->getStartTime();
 
         if ($scriptName !== null) {
-            $message = sprintf("End script %s, exit code : %d, duration : %d", $scriptName, $exitCode, round($duration, 3));
+            $message = sprintf("End script %s, exit code : %d, duration : %0.3fs", $scriptName, $exitCode, round($duration, 3));
         } else {
-            $message = sprintf("Exit code : %d, duration : %d", $exitCode, round($duration, 3));
+            $message = sprintf("Exit code : %d, duration : %0.3fs", $exitCode, round($duration, 3));
         }
 
         if ($exitCode === 0) {
