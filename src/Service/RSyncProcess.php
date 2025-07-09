@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\DTO\BackupFolder;
 use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
@@ -13,7 +14,7 @@ readonly class RSyncProcess
     ) {
     }
 
-    public function execute(\App\DTO\BackupFolder $backup, OutputStyle $output): string
+    public function execute(BackupFolder $backup, OutputStyle $output, bool $dryRun): string
     {
         $output->title("Start copy");
 
@@ -30,12 +31,12 @@ readonly class RSyncProcess
             $backup->to,
         ];
 
-        $process = $this->processRunner->startProcess($command, "", $output);
+        $process = $this->processRunner->startProcess($command, "", $output, $dryRun);
         return $this->processRunner->waitProcess($process, null, $output);
 
     }
 
-    private function buildFileList(\App\DTO\BackupFolder $backup)
+    private function buildFileList(BackupFolder $backup): void
     {
         $ignoreRules = array_merge($backup->ignore, [
             "#^\.backups/(log|excluded|included|summary)\.txt$#"

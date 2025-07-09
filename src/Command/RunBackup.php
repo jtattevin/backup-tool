@@ -12,6 +12,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
@@ -31,6 +32,7 @@ class RunBackup extends Command
     {
         parent::configure();
         $this->addArgument("configPath", InputArgument::REQUIRED);
+        $this->addOption("dry-run", null, InputOption::VALUE_NONE);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -39,6 +41,7 @@ class RunBackup extends Command
 
         try {
             $configPath = $input->getArgument("configPath");
+            $dryRun = $input->getOption("dry-run");
 
             $this->configFilenameValidator->validate($configPath);
 
@@ -50,7 +53,7 @@ class RunBackup extends Command
             );
 
             $backupBatch = new BackupBatch($processedConfiguration);
-            if (!$this->backupBatchRunner->executeBatch($backupBatch, $io)) {
+            if (!$this->backupBatchRunner->executeBatch($backupBatch, $io, $dryRun)) {
                 return self::FAILURE;
             }
 

@@ -27,17 +27,17 @@ readonly class BackupBatchRunner
     ) {
     }
 
-    public function executeBatch(BackupBatch $backupBatch, OutputStyle $output): bool
+    public function executeBatch(BackupBatch $backupBatch, OutputStyle $output, bool $dryRun): bool
     {
         $success = true;
         foreach ($backupBatch as $backup) {
-            $success = $this->executeBackup($backup, $output) && $success;
+            $success = $this->executeBackup($backup, $output, $dryRun) && $success;
         }
 
         return $success;
     }
 
-    private function executeBackup(BackupFolder $backup, OutputStyle $output): bool
+    private function executeBackup(BackupFolder $backup, OutputStyle $output, bool $dryRun): bool
     {
         try {
             $output->section("Begin backup of " . $backup->from . " -> " . $backup->to . " using " . $backup->configName);
@@ -50,7 +50,7 @@ readonly class BackupBatchRunner
 
             if ($backup->dumpScripts) {
                 $output->title("Running dump scripts");
-                $messages = $this->runDumpScript($backup, $output);
+                $messages = $this->runDumpScript($backup, $output, $dryRun);
                 $root->addChild($node = new TreeNode("Dump scripts"));
                 foreach ($messages as $scriptName => $message) {
                     $node->addChild(new TreeNode($scriptName . " : " . $message));
@@ -61,7 +61,7 @@ readonly class BackupBatchRunner
 
             if ($backup->beforeBackup) {
                 $output->title("Running before backup scripts");
-                $beforeMessage = $this->runBeforeBackupScript($backup, $output);
+                $beforeMessage = $this->runBeforeBackupScript($backup, $output, $dryRun);
                 $root->addChild(new TreeNode("Before : " . $beforeMessage));
             } else {
                 $root->addChild(new TreeNode("No before backup scripts"));
@@ -70,11 +70,11 @@ readonly class BackupBatchRunner
             $duringBackup = null;
             if ($backup->duringBackup) {
                 $output->title("Start during backup scripts");
-                $duringBackup = $this->startDuringBackupScript($backup, $output);
+                $duringBackup = $this->startDuringBackupScript($backup, $output, $dryRun);
             }
 
             // Backup here
-            $message = $this->rsyncProcess->execute($backup, $output);
+            $message = $this->rsyncProcess->execute($backup, $output, $dryRun);
             $root->addChild(new TreeNode("RSync : " . $message));
 
             if ($duringBackup !== null) {
@@ -87,7 +87,7 @@ readonly class BackupBatchRunner
 
             if ($backup->afterBackup) {
                 $output->title("Running after backup scripts");
-                $afterMessage = $this->runAfterBackupScript($backup, $output);
+                $afterMessage = $this->runAfterBackupScript($backup, $output, $dryRun);
                 $root->addChild(new TreeNode("After : " . $afterMessage));
             } else {
                 $root->addChild(new TreeNode("No after backup scripts"));
@@ -140,7 +140,7 @@ readonly class BackupBatchRunner
     }
 
 
-    private function runDumpScript(BackupFolder $backup, OutputStyle $output): array
+    private function runDumpScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): array
     {
         $messages = [];
         foreach ($backup->dumpScripts as $scriptName => $script) {
@@ -149,7 +149,8 @@ readonly class BackupBatchRunner
             $process               = $this->processRunner->startProcess(
                 $script,
                 $backup->workDirPath . "/output-" . $scriptName,
-                $output
+                $output,
+                $dryRun
             );
             $messages[$scriptName] = $this->processRunner->waitProcess($process, $scriptName, $output);
         }
@@ -157,16 +158,16 @@ readonly class BackupBatchRunner
         return $messages;
     }
 
-    private function runBeforeBackupScript(BackupFolder $backup, OutputStyle $output): string
+    private function runBeforeBackupScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): string
     {
-        $process = $this->processRunner->startProcess($backup->beforeBackup, $backup->beforeBackupLogPath, $output);
+        $process = $this->processRunner->startProcess($backup->beforeBackup, $backup->beforeBackupLogPath, $output, $dryRun);
 
         return $this->processRunner->waitProcess($process, null, $output);
     }
 
-    private function startDuringBackupScript(BackupFolder $backup, OutputStyle $output): Process
+    private function startDuringBackupScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): Process
     {
-        $process = $this->processRunner->startProcess($backup->duringBackup, $backup->duringBackupLogPath, $output);
+        $process = $this->processRunner->startProcess($backup->duringBackup, $backup->duringBackupLogPath, $output, $dryRun);
 
         if ($process->isStarted()) {
             $output->success("Process is started");
@@ -186,9 +187,9 @@ readonly class BackupBatchRunner
         return $this->processRunner->waitProcess($duringBackup, null, $output);
     }
 
-    private function runAfterBackupScript(BackupFolder $backup, OutputStyle $output): string
+    private function runAfterBackupScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): string
     {
-        $process = $this->processRunner->startProcess($backup->afterBackup, $backup->afterBackupLogPath, $output);
+        $process = $this->processRunner->startProcess($backup->afterBackup, $backup->afterBackupLogPath, $output, $dryRun);
 
         return $this->processRunner->waitProcess($process, null, $output);
     }

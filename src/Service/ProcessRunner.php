@@ -9,11 +9,15 @@ readonly class ProcessRunner
 {
 
     /** @noinspection PhpVoidFunctionResultUsedInspection */
-    public function startProcess(array|string $script, string $outputPath, OutputStyle $output): Process
+    public function startProcess(array|string $script, string $outputPath, OutputStyle $output, bool $dryRun): Process
     {
         $errorOutput = method_exists($output, "getErrorStyle") ? $output->getErrorStyle() : $output;
 
-        if (is_string($script)) {
+        if ($dryRun && is_string($script)) {
+            $process = new Process(["echo", $script]);
+        } elseif ($dryRun) {
+            $process = new Process(["echo", implode(" ", $script)]);
+        } elseif (is_string($script)) {
             $process = Process::fromShellCommandline($script);
         } else {
             $process = new Process($script);
