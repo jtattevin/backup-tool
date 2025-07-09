@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Console\Output;
+
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 

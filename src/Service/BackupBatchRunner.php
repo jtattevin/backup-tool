@@ -5,7 +5,7 @@ namespace App\Service;
 use App\Config\BackupConfiguration;
 use App\DTO\BackupBatch;
 use App\DTO\BackupFolder;
-use DuplicateOutput;
+use App\Console\Output\DuplicateOutput;
 use RuntimeException;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
