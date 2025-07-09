@@ -3,7 +3,8 @@
 namespace App\Command;
 
 use App\Config\MainConfiguration;
-use App\OptionsResolver\ConfigReader;
+use App\DTO\BackupBatch;
+use App\Service\BackupBatchRunner;
 use App\Validator\ConfigFilenameValidator;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
@@ -23,6 +24,9 @@ class RunBackup extends Command
     #[Required]
     public ConfigFilenameValidator $configFilenameValidator;
 
+    #[Required]
+    public BackupBatchRunner $backupBatchRunner;
+
     protected function configure(): void
     {
         parent::configure();
@@ -33,30 +37,29 @@ class RunBackup extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $configPath = $input->getArgument("configPath");
-
         try {
+            $configPath = $input->getArgument("configPath");
+
             $this->configFilenameValidator->validate($configPath);
-        } catch (ValidationFailedException $validationFailedException) {
-            $io->error($validationFailedException->getMessage());
 
-            return self::FAILURE;
-        }
-
-        try {
             $processedConfiguration = new Processor()->processConfiguration(
                 new MainConfiguration(),
                 [
                     Yaml::parseFile($configPath)["backup"] ?? [],
                 ]
             );
-        } catch (InvalidConfigurationException $invalidConfigurationException) {
-            $io->error($invalidConfigurationException->getMessage());
+
+            $backupBatch = new BackupBatch($processedConfiguration);
+            if (!$this->backupBatchRunner->executeBatch($backupBatch, $io)) {
+                return self::FAILURE;
+            }
+
+        } catch (InvalidConfigurationException|ValidationFailedException $exception) {
+            $io->error($exception->getMessage());
 
             return self::FAILURE;
         }
 
-        dump($processedConfiguration);
 
         return self::SUCCESS;
     }

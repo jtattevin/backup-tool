@@ -8,4 +8,5 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/DTO/'
             - '../src/Kernel.php'
