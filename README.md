@@ -28,6 +28,16 @@ during_backup: echo During backup > $OUTPUT_PATH # $OUTPUT_PATH = .backups/durin
 after_backup: echo After backup > $OUTPUT_PATH # $OUTPUT_PATH = .backups/after-backup-script
 ```
 
+## Execution
+
+Run the phar in the folder with the main config file :
+```shell
+./backup.phar backup main.yml
+./backup.phar backup main.yml --dry-run
+```
+In dry-run mode, the command is prefixed by an echo to show the command that would be runned.
+The include/exclude list is created.
+
 ## Scripts
 
 All dump_scripts are executed sequentially until completion.
