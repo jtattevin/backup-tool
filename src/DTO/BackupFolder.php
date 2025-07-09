@@ -36,6 +36,15 @@ class BackupFolder
     public string $afterBackupLogPath {
         get => $this->workDirPath . "/after-backup-script";
     }
+    public $includedListPath {
+        get => $this->workDirPath . "/included.txt";
+    }
+    public $excludedListPath {
+        get => $this->workDirPath . "/excluded.txt";
+    }
+    public $summaryLogPath {
+        get => $this->workDirPath . "/summary.txt";
+    }
 
 
     public function __construct(

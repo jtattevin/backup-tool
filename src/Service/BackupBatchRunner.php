@@ -19,8 +19,14 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
-class BackupBatchRunner
+readonly class BackupBatchRunner
 {
+    public function __construct(
+        private RSyncProcess $rsyncProcess,
+        private ProcessRunner $processRunner,
+    ) {
+    }
+
     public function executeBatch(BackupBatch $backupBatch, OutputStyle $output): bool
     {
         $success = true;
@@ -34,13 +40,13 @@ class BackupBatchRunner
     private function executeBackup(BackupFolder $backup, OutputStyle $output): bool
     {
         try {
-
             $output->section("Begin backup of " . $backup->from . " -> " . $backup->to . " using " . $backup->configName);
             $this->readConfig($backup);
             $this->ensureWorkDirExist($backup);
 
             $output = $this->swapOutput($output, $backup);
             $root   = new TreeNode($backup->from);
+            $root->addChild(new TreeNode("Date start : " . date("Y-m-d H:i:s")));
 
             if ($backup->dumpScripts) {
                 $output->title("Running dump scripts");
@@ -49,12 +55,16 @@ class BackupBatchRunner
                 foreach ($messages as $scriptName => $message) {
                     $node->addChild(new TreeNode($scriptName . " : " . $message));
                 }
+            } else {
+                $root->addChild(new TreeNode("No dump scripts"));
             }
 
             if ($backup->beforeBackup) {
                 $output->title("Running before backup scripts");
                 $beforeMessage = $this->runBeforeBackupScript($backup, $output);
                 $root->addChild(new TreeNode("Before : " . $beforeMessage));
+            } else {
+                $root->addChild(new TreeNode("No before backup scripts"));
             }
 
             $duringBackup = null;
@@ -64,22 +74,30 @@ class BackupBatchRunner
             }
 
             // Backup here
+            $message = $this->rsyncProcess->execute($backup, $output);
+            $root->addChild(new TreeNode("RSync : " . $message));
 
             if ($duringBackup !== null) {
                 $output->title("Stop during backup scripts");
                 $duringMessage = $this->stopDuringBackupScript($duringBackup, $output);
-                $root->addChild(new TreeNode("During : ".$duringMessage));
+                $root->addChild(new TreeNode("During : " . $duringMessage));
+            } else {
+                $root->addChild(new TreeNode("No during backup scripts"));
             }
 
             if ($backup->afterBackup) {
                 $output->title("Running after backup scripts");
                 $afterMessage = $this->runAfterBackupScript($backup, $output);
-                $root->addChild(new TreeNode("After : ".$afterMessage));
+                $root->addChild(new TreeNode("After : " . $afterMessage));
+            } else {
+                $root->addChild(new TreeNode("No after backup scripts"));
             }
 
-            $tree = TreeHelper::createTree($output, $root);
-            $tree->render();
+            $root->addChild(new TreeNode("Date end : " . date("Y-m-d H:i:s")));
 
+            TreeHelper::createTree($output, $root)->render();
+            $summaryOutput = new StreamOutput(fopen($backup->summaryLogPath, "w"));
+            TreeHelper::createTree($summaryOutput, $root)->render();
 
         } catch (InvalidConfigurationException|RuntimeException $exception) {
             $output->error($exception->getMessage());
@@ -121,41 +139,6 @@ class BackupBatchRunner
         );
     }
 
-    /** @noinspection PhpVoidFunctionResultUsedInspection */
-    private function startProcess(string $script, string $outputPath, OutputStyle $output): Process
-    {
-        $errorOutput = method_exists($output, "getErrorStyle") ? $output->getErrorStyle() : $output;
-
-        $process = Process::fromShellCommandline($script);
-        $process->setEnv(["OUTPUT_PATH" => $outputPath]);
-        $process->start(static fn ($type, $data) => match ($type) {
-            Process::OUT => $output->write($data),
-            default      => $errorOutput->write($data),
-        });
-
-        return $process;
-    }
-
-    private function waitProcess(Process $process, ?string $scriptName, OutputStyle $output): string
-    {
-        $exitCode = $process->wait();
-        $duration = microtime(true) - $process->getStartTime();
-
-        if ($scriptName !== null) {
-            $message = sprintf("End script %s, exit code : %d, duration : %d", $scriptName, $exitCode, round($duration, 3));
-        } else {
-            $message = sprintf("Exit code : %d, duration : %d", $exitCode, round($duration, 3));
-        }
-
-        if ($exitCode === 0) {
-            $output->success($message);
-            return "🟢 ".$message;
-        }
-
-        $output->warning($message);
-        return "🟠 ".$message;
-
-    }
 
     private function runDumpScript(BackupFolder $backup, OutputStyle $output): array
     {
@@ -163,12 +146,12 @@ class BackupBatchRunner
         foreach ($backup->dumpScripts as $scriptName => $script) {
             $output->note("Begin script " . $scriptName);
 
-            $process               = $this->startProcess(
+            $process               = $this->processRunner->startProcess(
                 $script,
                 $backup->workDirPath . "/output-" . $scriptName,
                 $output
             );
-            $messages[$scriptName] = $this->waitProcess($process, $scriptName, $output);
+            $messages[$scriptName] = $this->processRunner->waitProcess($process, $scriptName, $output);
         }
 
         return $messages;
@@ -176,14 +159,14 @@ class BackupBatchRunner
 
     private function runBeforeBackupScript(BackupFolder $backup, OutputStyle $output): string
     {
-        $process = $this->startProcess($backup->beforeBackup, $backup->beforeBackupLogPath, $output);
+        $process = $this->processRunner->startProcess($backup->beforeBackup, $backup->beforeBackupLogPath, $output);
 
-        return $this->waitProcess($process, null, $output);
+        return $this->processRunner->waitProcess($process, null, $output);
     }
 
     private function startDuringBackupScript(BackupFolder $backup, OutputStyle $output): Process
     {
-        $process = $this->startProcess($backup->duringBackup, $backup->duringBackupLogPath, $output);
+        $process = $this->processRunner->startProcess($backup->duringBackup, $backup->duringBackupLogPath, $output);
 
         if ($process->isStarted()) {
             $output->success("Process is started");
@@ -200,13 +183,13 @@ class BackupBatchRunner
             $duringBackup->stop();
         }
 
-        return $this->waitProcess($duringBackup, null, $output);
+        return $this->processRunner->waitProcess($duringBackup, null, $output);
     }
 
     private function runAfterBackupScript(BackupFolder $backup, OutputStyle $output): string
     {
-        $process = $this->startProcess($backup->afterBackup, $backup->afterBackupLogPath, $output);
+        $process = $this->processRunner->startProcess($backup->afterBackup, $backup->afterBackupLogPath, $output);
 
-        return $this->waitProcess($process, null, $output);
+        return $this->processRunner->waitProcess($process, null, $output);
     }
 }
