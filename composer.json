@@ -50,10 +50,10 @@
         "auto-scripts": {
             "cache:clear": "symfony-cmd"
         },
-        "post-install-cmd": [
+        "post-update-cmd": [
             "@auto-scripts"
         ],
-        "post-update-cmd": [
+        "post-autoload-dump": [
             "@auto-scripts"
         ]
     },
@@ -65,5 +65,8 @@
             "allow-contrib": false,
             "require": "^7.3"
         }
-    }
+    },
+    "bin": [
+        "bin/console"
+    ]
 }
