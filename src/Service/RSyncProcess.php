@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\DTO\BackupFolder;
-use RuntimeException;
 use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -35,7 +34,7 @@ readonly class RSyncProcess
             $backup->to,
         ];
 
-        $workdir = getcwd() ?: throw new RuntimeException("Can't determine current working directory");
+        $workdir = getcwd() ?: throw new \RuntimeException("Can't determine current working directory");
         $process = $this->processRunner->startProcess($command, '', $workdir, $output, $dryRun);
 
         return $this->processRunner->waitProcess($process, null, $output);

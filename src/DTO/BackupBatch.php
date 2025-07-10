@@ -2,14 +2,11 @@
 
 namespace App\DTO;
 
-use Iterator;
-use RuntimeException;
-
-/** @implements Iterator<int,BackupFolder> */
-class BackupBatch implements Iterator
+/** @implements \Iterator<int,BackupFolder> */
+class BackupBatch implements \Iterator
 {
     /** @var array<int,BackupFolder> */
-    private(set) array $folders;
+    public private(set) array $folders;
 
     /**
      * @param array<int,array{from:string,to:string,configName:string}> $config
@@ -24,7 +21,7 @@ class BackupBatch implements Iterator
 
     public function current(): mixed
     {
-        return current($this->folders) ?: throw new RuntimeException("Can't read past end of batch");
+        return current($this->folders) ?: throw new \RuntimeException("Can't read past end of batch");
     }
 
     public function next(): void

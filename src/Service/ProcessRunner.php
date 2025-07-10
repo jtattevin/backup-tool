@@ -29,7 +29,7 @@ readonly class ProcessRunner
         $process->setEnv(['OUTPUT_PATH' => $outputPath]);
         $process->start(static fn ($type, $data) => match ($type) {
             Process::OUT => $output->write($data),
-            default      => $errorOutput->write($data),
+            default => $errorOutput->write($data),
         });
 
         return $process;
@@ -49,11 +49,11 @@ readonly class ProcessRunner
         if (0 === $exitCode) {
             $output->success($message);
 
-            return '🟢 ' . $message;
+            return '🟢 '.$message;
         }
 
         $output->warning($message);
 
-        return '🟠 ' . $message;
+        return '🟠 '.$message;
     }
 }
