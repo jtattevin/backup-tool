@@ -21,7 +21,7 @@ class MainConfiguration implements ConfigurationInterface
                             ->isRequired()
                             ->cannotBeEmpty()
                             ->validate()
-                                ->ifTrue(fn($value) => !is_dir($value))
+                                ->ifTrue(fn ($value) => !is_dir($value))
                                 ->thenInvalid('From must be a directory')
                             ->end()
                         ->end()
