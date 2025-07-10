@@ -86,5 +86,5 @@ jobs:
       - name: Composer install
         run: composer install --prefer-dist --no-progress
 
-      - name: Execute PHP-CS-Fixer
+      - name: Execute PHPUnit
         run: bin/phpunit
