@@ -95,7 +95,7 @@ readonly class BackupBatchRunner
             $root->addChild(new TreeNode('Date end : '.date('Y-m-d H:i:s')));
 
             TreeHelper::createTree($output, $root)->render();
-            $summaryOutput = new StreamOutput(fopen($backup->summaryLogPath, 'w'));
+            $summaryOutput = new StreamOutput(fopen($backup->summaryLogPath, 'w') ?: throw new \RuntimeException("Can't open {$backup->summaryLogPath} for writing"));
             TreeHelper::createTree($summaryOutput, $root)->render();
         } catch (InvalidConfigurationException|\RuntimeException $exception) {
             $output->error($exception->getMessage());
@@ -108,6 +108,7 @@ readonly class BackupBatchRunner
 
     private function readConfig(BackupFolder $backup): void
     {
+        /** @var array{dump_scripts:array<string,string>,ignore_pattern:string[],ignore_folder:string[],before_backup:string|null,during_backup:string|null,after_backup:string|null} $processedConfiguration */
         $processedConfiguration = new Processor()->processConfiguration(
             new BackupConfiguration(),
             [
@@ -132,11 +133,14 @@ readonly class BackupBatchRunner
             new ArrayInput([]),
             new DuplicateOutput(
                 $output,
-                new StreamOutput(fopen($backup->logPath, 'w'))
+                new StreamOutput(fopen($backup->logPath, 'w') ?: throw new \RuntimeException("Can't open {$backup->logPath} for writing"))
             )
         );
     }
 
+    /**
+     * @return array<string,string>
+     */
     private function runDumpScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): array
     {
         $messages = [];

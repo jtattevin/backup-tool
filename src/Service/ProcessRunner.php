@@ -7,7 +7,11 @@ use Symfony\Component\Process\Process;
 
 readonly class ProcessRunner
 {
-    /** @noinspection PhpVoidFunctionResultUsedInspection */
+    /**
+     * @param string[]|string $script
+     *
+     * @noinspection PhpVoidFunctionResultUsedInspection
+     */
     public function startProcess(array|string $script, string $outputPath, string $workdir, OutputStyle $output, bool $dryRun): Process
     {
         $errorOutput = method_exists($output, 'getErrorStyle') ? $output->getErrorStyle() : $output;

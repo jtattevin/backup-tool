@@ -1,6 +1,8 @@
 {
     "type": "project",
-    "license": "proprietary",
+    "license": "MIT",
+    "name": "jtattevin/backup-tool",
+    "description": "Simple tool scheduler to manage backup of multiple projects.",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
@@ -22,6 +24,7 @@
     "config": {
         "allow-plugins": {
             "php-http/discovery": true,
+            "phpstan/extension-installer": true,
             "symfony/flex": true,
             "symfony/runtime": true
         },
@@ -60,8 +63,10 @@
             "@php vendor/bin/php-cs-fixer fix"
         ],
         "test": [
-            "@php vendor/bin/php-cs-fixer check",
+            "@composer validate",
+            "@composer audit",
             "@php vendor/bin/phpstan",
+            "@php vendor/bin/php-cs-fixer check",
             "@php bin/phpunit"
         ]
     },
@@ -79,7 +84,9 @@
     ],
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.82",
+        "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^12"
     }
 }

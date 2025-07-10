@@ -34,7 +34,8 @@ readonly class RSyncProcess
             $backup->to,
         ];
 
-        $process = $this->processRunner->startProcess($command, '', getcwd(), $output, $dryRun);
+        $workdir = getcwd() ?: throw new \RuntimeException("Can't determine current working directory");
+        $process = $this->processRunner->startProcess($command, '', $workdir, $output, $dryRun);
 
         return $this->processRunner->waitProcess($process, null, $output);
     }
