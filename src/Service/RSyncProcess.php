@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\DTO\BackupFolder;
 use Symfony\Component\Console\Style\OutputStyle;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 readonly class RSyncProcess
@@ -20,6 +21,8 @@ readonly class RSyncProcess
         $this->buildFileList($backup);
         $output->note("Included files list is in " . $backup->includedListPath);
         $output->note("Excluded files list is in " . $backup->excludedListPath);
+
+        new Filesystem()->mkdir($backup->to);
 
         $command = [
             "rsync",
