@@ -21,7 +21,7 @@ class BackupFolder
     private(set) ?string $afterBackup;
 
     public string $workDirPath {
-        get => $this->from . "/.backups";
+        get => realpath($this->from) . "/.backups";
     }
 
     public string $logPath {

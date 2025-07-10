@@ -149,6 +149,7 @@ readonly class BackupBatchRunner
             $process               = $this->processRunner->startProcess(
                 $script,
                 $backup->workDirPath . "/output-" . $scriptName,
+                $backup->from,
                 $output,
                 $dryRun
             );
@@ -160,14 +161,14 @@ readonly class BackupBatchRunner
 
     private function runBeforeBackupScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): string
     {
-        $process = $this->processRunner->startProcess($backup->beforeBackup, $backup->beforeBackupLogPath, $output, $dryRun);
+        $process = $this->processRunner->startProcess($backup->beforeBackup, $backup->beforeBackupLogPath, $backup->from,$output, $dryRun);
 
         return $this->processRunner->waitProcess($process, null, $output);
     }
 
     private function startDuringBackupScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): Process
     {
-        $process = $this->processRunner->startProcess($backup->duringBackup, $backup->duringBackupLogPath, $output, $dryRun);
+        $process = $this->processRunner->startProcess($backup->duringBackup, $backup->duringBackupLogPath, $backup->from,$output, $dryRun);
 
         if ($process->isStarted()) {
             $output->success("Process is started");
@@ -189,7 +190,7 @@ readonly class BackupBatchRunner
 
     private function runAfterBackupScript(BackupFolder $backup, OutputStyle $output, bool $dryRun): string
     {
-        $process = $this->processRunner->startProcess($backup->afterBackup, $backup->afterBackupLogPath, $output, $dryRun);
+        $process = $this->processRunner->startProcess($backup->afterBackup, $backup->afterBackupLogPath, $backup->from, $output, $dryRun);
 
         return $this->processRunner->waitProcess($process, null, $output);
     }

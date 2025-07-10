@@ -5,7 +5,6 @@ namespace App\Service;
 use App\DTO\BackupFolder;
 use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
 
 readonly class RSyncProcess
 {
@@ -31,7 +30,8 @@ readonly class RSyncProcess
             $backup->to,
         ];
 
-        $process = $this->processRunner->startProcess($command, "", $output, $dryRun);
+        $process = $this->processRunner->startProcess($command, "", getcwd(), $output, $dryRun);
+
         return $this->processRunner->waitProcess($process, null, $output);
 
     }
@@ -39,7 +39,7 @@ readonly class RSyncProcess
     private function buildFileList(BackupFolder $backup): void
     {
         $ignoreRules = array_merge($backup->ignore, [
-            "#^\.backups/(log|excluded|included|summary)\.txt$#"
+            "#^\.backups/(log|excluded|included|summary)\.txt$#",
         ]);
 
         $baseFinder = Finder::create()

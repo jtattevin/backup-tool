@@ -9,7 +9,7 @@ readonly class ProcessRunner
 {
 
     /** @noinspection PhpVoidFunctionResultUsedInspection */
-    public function startProcess(array|string $script, string $outputPath, OutputStyle $output, bool $dryRun): Process
+    public function startProcess(array|string $script, string $outputPath, string $workdir, OutputStyle $output, bool $dryRun): Process
     {
         $errorOutput = method_exists($output, "getErrorStyle") ? $output->getErrorStyle() : $output;
 
@@ -22,6 +22,7 @@ readonly class ProcessRunner
         } else {
             $process = new Process($script);
         }
+        $process->setWorkingDirectory($workdir);
         $process->setEnv(["OUTPUT_PATH" => $outputPath]);
         $process->start(static fn ($type, $data) => match ($type) {
             Process::OUT => $output->write($data),
