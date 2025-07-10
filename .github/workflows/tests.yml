@@ -87,4 +87,13 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Execute PHPUnit
-        run: bin/phpunit
+        run: bin/phpunit --coverage-clover ./coverage.xml
+        env:
+          XDEBUG_MODE: coverage
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODE_COV_TOKEN }}
+          files: ./coverage.xml
+          verbose: true
