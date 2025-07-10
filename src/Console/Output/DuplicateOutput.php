@@ -9,7 +9,7 @@ class DuplicateOutput extends Output
 {
     public function __construct(
         private readonly OutputInterface $outputA,
-        private readonly OutputInterface $outputB
+        private readonly OutputInterface $outputB,
     ) {
         parent::__construct(
             $this->outputA->getVerbosity(),
@@ -22,6 +22,4 @@ class DuplicateOutput extends Output
         $this->outputA->write($message, $newline);
         $this->outputB->write($message, $newline);
     }
-
-
 }

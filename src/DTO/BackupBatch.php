@@ -2,11 +2,9 @@
 
 namespace App\DTO;
 
-use Iterator;
-
-class BackupBatch implements Iterator
+class BackupBatch implements \Iterator
 {
-    private(set) array $folders;
+    public private(set) array $folders;
 
     public function __construct(array $config)
     {
@@ -26,14 +24,14 @@ class BackupBatch implements Iterator
         next($this->folders);
     }
 
-    public function key(): int|null
+    public function key(): ?int
     {
         return key($this->folders);
     }
 
     public function valid(): bool
     {
-        return key($this->folders) !== null;
+        return null !== key($this->folders);
     }
 
     public function rewind(): void

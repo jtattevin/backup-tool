@@ -55,6 +55,9 @@
         ],
         "post-autoload-dump": [
             "@auto-scripts"
+        ],
+        "cleanup": [
+            "@php vendor/bin/php-cs-fixer fix"
         ]
     },
     "conflict": {
@@ -68,5 +71,8 @@
     },
     "bin": [
         "bin/console"
-    ]
+    ],
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.82"
+    }
 }

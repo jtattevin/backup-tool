@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Service\Attribute\Required;
 
-#[AsCommand("backup")]
+#[AsCommand('backup')]
 class RunBackup extends Command
 {
     #[Required]
@@ -31,8 +31,8 @@ class RunBackup extends Command
     protected function configure(): void
     {
         parent::configure();
-        $this->addArgument("configPath", InputArgument::REQUIRED);
-        $this->addOption("dry-run", null, InputOption::VALUE_NONE);
+        $this->addArgument('configPath', InputArgument::REQUIRED);
+        $this->addOption('dry-run', null, InputOption::VALUE_NONE);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -40,15 +40,15 @@ class RunBackup extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $configPath = $input->getArgument("configPath");
-            $dryRun = $input->getOption("dry-run");
+            $configPath = $input->getArgument('configPath');
+            $dryRun = $input->getOption('dry-run');
 
             $this->configFilenameValidator->validate($configPath);
 
             $processedConfiguration = new Processor()->processConfiguration(
                 new MainConfiguration(),
                 [
-                    Yaml::parseFile($configPath)["backup"] ?? [],
+                    Yaml::parseFile($configPath)['backup'] ?? [],
                 ]
             );
 
@@ -56,13 +56,11 @@ class RunBackup extends Command
             if (!$this->backupBatchRunner->executeBatch($backupBatch, $io, $dryRun)) {
                 return self::FAILURE;
             }
-
         } catch (InvalidConfigurationException|ValidationFailedException $exception) {
             $io->error($exception->getMessage());
 
             return self::FAILURE;
         }
-
 
         return self::SUCCESS;
     }
