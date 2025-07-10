@@ -20,13 +20,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build env
-        shell: bash
         run: |
           composer install --prefer-dist --no-progress --no-dev
           composer dump-env prod
 
       - name: Box
-        shell: bash
         run: box compile
 
       - name: Upload Release Asset

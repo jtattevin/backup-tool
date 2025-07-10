@@ -1,0 +1,72 @@
+name: Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  composer:
+    name: Composer validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+
+  composerAudit:
+    name: Composer audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: ctype, iconv
+
+      - uses: actions/checkout@v4
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run composer audit
+        uses: alamirault/composer-audit-action@v1
+
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: ctype, iconv
+
+      - uses: actions/checkout@v4
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-progress
+
+      - name: Execute PHPStan
+        run: vendor/bin/phpstan
+
+  phpcsfixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: ctype, iconv
+
+      - uses: actions/checkout@v4
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-progress
+
+      - name: Execute PHP-CS-Fixer
+        run: vendor/bin/php-cs-fixer check
