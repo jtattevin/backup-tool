@@ -1,6 +1,8 @@
 {
     "type": "project",
-    "license": "proprietary",
+    "license": "MIT",
+    "name": "jtattevin/backup-tool",
+    "description": "Simple tool scheduler to manage backup of multiple projects.",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
@@ -60,8 +62,10 @@
             "@php vendor/bin/php-cs-fixer fix"
         ],
         "test": [
-            "@php vendor/bin/php-cs-fixer check",
+            "@composer validate",
+            "@composer audit",
             "@php vendor/bin/phpstan",
+            "@php vendor/bin/php-cs-fixer check",
             "@php bin/phpunit"
         ]
     },
