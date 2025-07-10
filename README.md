@@ -19,7 +19,10 @@ dump_scripts:
   script1: mysqldump ... >$OUTPUT_PATH # $OUTPUT_PATH = .backups/output-script1
   script2: echo mysqldump # $OUTPUT_PATH = .backups/output-script1
 
-ignore:
+ignore_folder:
+  - node_modules/
+
+ignore_pattern:
   - node_modules/
   - "#^.git/#"
 
@@ -45,10 +48,14 @@ Then the before_backup script is executed until completion.
 Then the during_backup script is executed in the background.
 
 The rsync command then starts, it works in archive mode and uses --files-from to list the files to copy.
-This list is constructed using symfony/finder. The ignore list is applied on the path.
+This list is constructed using symfony/finder.
+The ignore_folder is pruning folder from being traversed
+The ignore_pattern list is applied on the remaining paths.
 
 Once the rsync is finished, the during_backup process is stopped.
 Then the after_backup script is executed until completion.
+
+The script are executed inside the "from" directory
 
 ## Output
 

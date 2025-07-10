@@ -6,6 +6,7 @@ use App\DTO\BackupFolder;
 use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 readonly class RSyncProcess
 {
@@ -41,25 +42,31 @@ readonly class RSyncProcess
 
     private function buildFileList(BackupFolder $backup): void
     {
-        $ignoreRules = array_merge($backup->ignore, [
+        $ignoreRules = array_merge($backup->ignorePattern, [
             "#^\.backups/(log|excluded|included|summary)\.txt$#",
         ]);
 
-        $baseFinder = Finder::create()
+        $baseFinder      = Finder::create()
             ->files()
             ->ignoreDotFiles(false)
             ->ignoreVCS(false)
             ->ignoreVCSIgnored(false)
             ->in($backup->from)
+            ->filter(fn (SplFileInfo $file) => !in_array($file->getRelativePathName(), $backup->ignoreFolder), true)
         ;
 
         $excluded = [];
+
+        foreach($backup->ignoreFolder as $ignoreFolder) {
+            $excluded[] = "### Folder $ignoreFolder";
+        }
+
 
         $finder = clone $baseFinder;
         foreach ($ignoreRules as $ignoreRule) {
             $finder->notPath($ignoreRule);
 
-            $excluded[] = "### $ignoreRule";
+            $excluded[] = "### Pattern $ignoreRule";
             foreach ((clone $baseFinder)->path($ignoreRule) as $file) {
                 $excluded[] = $file->getRelativePathname();
             }
