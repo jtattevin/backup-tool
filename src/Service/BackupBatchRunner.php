@@ -6,6 +6,7 @@ use App\Config\BackupConfiguration;
 use App\Console\Output\DuplicateOutput;
 use App\DTO\BackupBatch;
 use App\DTO\BackupFolder;
+use Symfony\Component\Clock\Clock;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Helper\TreeHelper;
@@ -26,17 +27,17 @@ readonly class BackupBatchRunner
     ) {
     }
 
-    public function executeBatch(BackupBatch $backupBatch, OutputStyle $output, bool $dryRun): bool
+    public function executeBatch(BackupBatch $backupBatch, string $workdir, OutputStyle $output, bool $dryRun): bool
     {
         $success = true;
         foreach ($backupBatch as $backup) {
-            $success = $this->executeBackup($backup, $output, $dryRun) && $success;
+            $success = $this->executeBackup($backup, $workdir, $output, $dryRun) && $success;
         }
 
         return $success;
     }
 
-    private function executeBackup(BackupFolder $backup, OutputStyle $output, bool $dryRun): bool
+    private function executeBackup(BackupFolder $backup, string $workdir, OutputStyle $output, bool $dryRun): bool
     {
         try {
             $output->section('Begin backup of '.$backup->from.' -> '.$backup->to.' using '.$backup->configName);
@@ -45,7 +46,7 @@ readonly class BackupBatchRunner
 
             $output = $this->swapOutput($output, $backup);
             $root = new TreeNode($backup->from);
-            $root->addChild(new TreeNode('Date start : '.date('Y-m-d H:i:s')));
+            $root->addChild(new TreeNode('Date start : '.Clock::get()->now()->format('Y-m-d H:i:s')));
 
             if ($backup->dumpScripts) {
                 $output->title('Running dump scripts');
@@ -72,8 +73,7 @@ readonly class BackupBatchRunner
                 $duringBackup = $this->startDuringBackupScript($backup, $output, $dryRun);
             }
 
-            // Backup here
-            $message = $this->rsyncProcess->execute($backup, $output, $dryRun);
+            $message = $this->rsyncProcess->execute($backup, $workdir, $output, $dryRun);
             $root->addChild(new TreeNode('RSync : '.$message));
 
             if (null !== $duringBackup) {
@@ -92,7 +92,7 @@ readonly class BackupBatchRunner
                 $root->addChild(new TreeNode('No after backup scripts'));
             }
 
-            $root->addChild(new TreeNode('Date end : '.date('Y-m-d H:i:s')));
+            $root->addChild(new TreeNode('Date end : '.Clock::get()->now()->format('Y-m-d H:i:s')));
 
             TreeHelper::createTree($output, $root)->render();
             $summaryOutput = new StreamOutput(fopen($backup->summaryLogPath, 'w') ?: throw new \RuntimeException("Can't open {$backup->summaryLogPath} for writing"));

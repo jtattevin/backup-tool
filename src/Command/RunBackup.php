@@ -41,19 +41,21 @@ class RunBackup extends Command
 
         try {
             $configPath = $input->getArgument('configPath');
+            $workdir = dirname($configPath);
             $dryRun = $input->getOption('dry-run');
 
             $this->configFilenameValidator->validate($configPath);
 
             $processedConfiguration = new Processor()->processConfiguration(
-                new MainConfiguration(),
+                new MainConfiguration($workdir),
                 [
                     Yaml::parseFile($configPath)['backup'] ?? [],
                 ]
             );
 
             $backupBatch = new BackupBatch($processedConfiguration);
-            if (!$this->backupBatchRunner->executeBatch($backupBatch, $io, $dryRun)) {
+
+            if (!$this->backupBatchRunner->executeBatch($backupBatch, $workdir, $io, $dryRun)) {
                 return self::FAILURE;
             }
         } catch (InvalidConfigurationException|ValidationFailedException $exception) {
