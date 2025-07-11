@@ -34,6 +34,10 @@ class BackupBatchRunnerTest extends TestCase
                 $process->setWorkingDirectory($workdir);
                 $process->setEnv(['OUTPUT_PATH' => $outputPath]);
 
+                if ('sleep 2' === $script) {
+                    $process->start();
+                }
+
                 return $process;
             })
         ;
@@ -53,9 +57,12 @@ class BackupBatchRunnerTest extends TestCase
         $batch = new BackupBatch([
             ['from' => __DIR__.'/../../../example/from', 'to' => __DIR__.'/../../../example/to/dir1', 'configName' => 'backup.yml'],
             ['from' => dirname(__DIR__, 3).'/example/from', 'to' => __DIR__.'/../../../example/to/dir2', 'configName' => 'backup-complete.yml'],
+            ['from' => dirname(__DIR__, 3).'/example/from', 'to' => __DIR__.'/../../../example/to/dir2', 'configName' => 'backup-sleep-during.yml'],
         ]);
         $result = $backup->executeBatch($batch, __DIR__, $wrapperOutput, true);
         self::assertTrue($result);
+
+        Clock::get()->sleep(3600);
 
         $batch = new BackupBatch([
             ['from' => __DIR__.'/../../../example/from', 'to' => __DIR__.'/../../../example/to/dir1', 'configName' => 'backup.yml'],
@@ -130,19 +137,42 @@ Running after backup scripts
 ├── After : echo after_backup / {ROOTDIR}/example/from / {ROOTDIR}/example/from/.backups/after-backup-script
 └── Date end : 2025-07-11 12:00:00
 
+Begin backup of {ROOTDIR}/example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir2 using backup-sleep-during.yml
+-----------
+
+! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
+
+
+Start during backup scripts
+===========================
+
+[OK] Process is started
+
+Stop during backup scripts
+==========================
+
+{ROOTDIR}/example/from
+├── Date start : 2025-07-11 12:00:00
+├── No dump scripts
+├── No before backup scripts
+├── RSync : {ROOTDIR}/example/from->{ROOTDIR}/tests/App/Service/../../../example/to/dir2
+├── During : sleep 2 / {ROOTDIR}/example/from / {ROOTDIR}/example/from/.backups/during-backup-script
+├── No after backup scripts
+└── Date end : 2025-07-11 12:00:00
+
 Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir1 using backup.yml
 -----------
 
 ! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
 
 {ROOTDIR}/tests/App/Service/../../../example/from
-├── Date start : 2025-07-11 12:00:00
+├── Date start : 2025-07-11 13:00:00
 ├── No dump scripts
 ├── No before backup scripts
 ├── RSync : {ROOTDIR}/tests/App/Service/../../../example/from->{ROOTDIR}/tests/App/Service/../../../example/to/dir1
 ├── No during backup scripts
 ├── No after backup scripts
-└── Date end : 2025-07-11 12:00:00
+└── Date end : 2025-07-11 13:00:00
 
 Begin backup of {ROOTDIR}/example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir2 using backup-missing.yml
 -----------
