@@ -5,8 +5,13 @@ namespace App\Config;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class MainConfiguration implements ConfigurationInterface
+readonly class MainConfiguration implements ConfigurationInterface
 {
+    public function __construct(
+        private string $rootDir,
+    ) {
+    }
+
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('backup');
@@ -20,6 +25,10 @@ class MainConfiguration implements ConfigurationInterface
                         ->scalarNode('from')
                             ->isRequired()
                             ->cannotBeEmpty()
+                            ->beforeNormalization()
+                                ->ifString()
+                                ->then(fn (string $value): string =>realpath($value) ?: realpath($this->rootDir."/".$value) ?: $value)
+                            ->end()
                             ->validate()
                                 ->ifTrue(fn ($value) => !is_dir($value))
                                 ->thenInvalid('From must be a directory')

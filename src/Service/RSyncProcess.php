@@ -15,26 +15,27 @@ readonly class RSyncProcess
     ) {
     }
 
-    public function execute(BackupFolder $backup, OutputStyle $output, bool $dryRun): string
+    public function execute(BackupFolder $backup, string $workdir, OutputStyle $output, bool $dryRun): string
     {
         $output->title('Start copy');
 
         $this->buildFileList($backup);
-        $output->note('Included files list is in '.$backup->includedListPath);
-        $output->note('Excluded files list is in '.$backup->excludedListPath);
+        $output->note('Included files list is in ' . $backup->includedListPath);
+        $output->note('Excluded files list is in ' . $backup->excludedListPath);
 
-        new Filesystem()->mkdir($backup->to);
+        if (!str_contains($backup->to, "://")) {
+            new Filesystem()->mkdir($backup->to);
+        }
 
         $command = [
             'rsync',
             '--archive',
             '--verbose',
-            '--files-from='.$backup->includedListPath,
+            '--files-from=' . $backup->includedListPath,
             $backup->from,
             $backup->to,
         ];
 
-        $workdir = getcwd() ?: throw new \RuntimeException("Can't determine current working directory");
         $process = $this->processRunner->startProcess($command, '', $workdir, $output, $dryRun);
 
         return $this->processRunner->waitProcess($process, null, $output);

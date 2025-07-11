@@ -26,17 +26,17 @@ readonly class BackupBatchRunner
     ) {
     }
 
-    public function executeBatch(BackupBatch $backupBatch, OutputStyle $output, bool $dryRun): bool
+    public function executeBatch(BackupBatch $backupBatch, string $workdir, OutputStyle $output, bool $dryRun): bool
     {
         $success = true;
         foreach ($backupBatch as $backup) {
-            $success = $this->executeBackup($backup, $output, $dryRun) && $success;
+            $success = $this->executeBackup($backup, $workdir, $output, $dryRun) && $success;
         }
 
         return $success;
     }
 
-    private function executeBackup(BackupFolder $backup, OutputStyle $output, bool $dryRun): bool
+    private function executeBackup(BackupFolder $backup, string $workdir, OutputStyle $output, bool $dryRun): bool
     {
         try {
             $output->section('Begin backup of '.$backup->from.' -> '.$backup->to.' using '.$backup->configName);
@@ -73,7 +73,7 @@ readonly class BackupBatchRunner
             }
 
             // Backup here
-            $message = $this->rsyncProcess->execute($backup, $output, $dryRun);
+            $message = $this->rsyncProcess->execute($backup, $workdir, $output, $dryRun);
             $root->addChild(new TreeNode('RSync : '.$message));
 
             if (null !== $duringBackup) {

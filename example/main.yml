@@ -1,0 +1,3 @@
+backup:
+  - from: ./from
+    to: ./to

@@ -12,7 +12,7 @@ class MainConfigurationTest extends TestCase
     public function testMinimalConfig()
     {
         $processedConfiguration = new Processor()->processConfiguration(
-            new MainConfiguration(),
+            new MainConfiguration(__DIR__),
             [
                 [
                     ['from' => '/tmp', 'to' => '/tmp'],
@@ -28,7 +28,7 @@ class MainConfigurationTest extends TestCase
     public function testCompleteConfig()
     {
         $processedConfiguration = new Processor()->processConfiguration(
-            new MainConfiguration(),
+            new MainConfiguration(__DIR__),
             [
                 [
                     ['from' => '/tmp', 'to' => '/tmp', 'configName' => 'backup.yaml'],
@@ -49,7 +49,7 @@ class MainConfigurationTest extends TestCase
         $this->expectExceptionMessage('Invalid configuration for path "backup.0.from": From must be a directory');
 
         new Processor()->processConfiguration(
-            new MainConfiguration(),
+            new MainConfiguration(__DIR__),
             [
                 [
                     ['from' => '/non-existing', 'to' => '/tmp'],
@@ -64,7 +64,7 @@ class MainConfigurationTest extends TestCase
         $this->expectExceptionMessage('The path "backup" should have at least 1 element(s) defined.');
 
         new Processor()->processConfiguration(
-            new MainConfiguration(),
+            new MainConfiguration(__DIR__),
             [
             ]
         );

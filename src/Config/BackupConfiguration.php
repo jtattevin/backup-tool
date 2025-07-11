@@ -5,7 +5,7 @@ namespace App\Config;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class BackupConfiguration implements ConfigurationInterface
+readonly class BackupConfiguration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
