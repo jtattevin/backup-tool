@@ -45,6 +45,7 @@ class BackupBatchRunnerTest extends TestCase
         ;
 
         $output = new BufferedOutput();
+        putenv('COLUMNS='.SymfonyStyle::MAX_LINE_LENGTH);
         $wrapperOutput = new SymfonyStyle(new ArrayInput([]), $output);
 
         $backup = new BackupBatchRunner($rsync, $processRunner);
@@ -79,8 +80,7 @@ __halt_compiler();
 Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir1 using backup.yml
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-! [NOTE] Starting to log in
-!        {ROOTDIR}/example/from/.backups/log.txt
+! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
 
 {ROOTDIR}/tests/App/Service/../../../example/from
 ├── Date start : 2025-07-11 12:00:00
@@ -94,8 +94,7 @@ Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/t
 Begin backup of {ROOTDIR}/example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir2 using backup-complete.yml
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-! [NOTE] Starting to log in
-!        {ROOTDIR}/example/from/.backups/log.txt
+! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
 
 
 Running dump scripts
@@ -133,8 +132,7 @@ Running after backup scripts
 Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir1 using backup.yml
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-! [NOTE] Starting to log in
-!        {ROOTDIR}/example/from/.backups/log.txt
+! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
 
 {ROOTDIR}/tests/App/Service/../../../example/from
 ├── Date start : 2025-07-11 12:00:00
@@ -148,6 +146,5 @@ Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/t
 Begin backup of {ROOTDIR}/example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir2 using backup-missing.yml
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-[ERROR] File "{ROOTDIR}/example/from/backup-missing.yml" does
-not exist.
+[ERROR] File "{ROOTDIR}/example/from/backup-missing.yml" does not exist.
 
