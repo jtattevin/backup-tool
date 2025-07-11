@@ -91,6 +91,8 @@ class RSyncProcessTest extends TestCase
 
         self::assertEqualsCanonicalizing([
             '.backups/output-script-A',
+            'backup-complete.yml',
+            'backup.yml',
             'file1.txt',
             'dir1/dir2/file6.txt',
             'dir1/dir2/file8.txt',

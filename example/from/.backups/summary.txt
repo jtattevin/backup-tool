@@ -1,0 +1,8 @@
+/home/julien/Fab/Backup/app/tests/App/Service/../../../example/from
+├── Date start : 2025-07-11 12:00:00
+├── No dump scripts
+├── No before backup scripts
+├── RSync : /home/julien/Fab/Backup/app/tests/App/Service/../../../example/from->/home/julien/Fab/Backup/app/tests/App/Service/../../../example/to/dir1
+├── No during backup scripts
+├── No after backup scripts
+└── Date end : 2025-07-11 12:00:00

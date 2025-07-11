@@ -1,0 +1,13 @@
+dump_scripts:
+  echo1: echo 1
+  echo2: echo 2
+
+ignore_folder:
+  - dir1
+
+ignore_pattern:
+  - dir2
+
+before_backup: echo before_backup
+during_backup: echo during_backup
+after_backup: echo after_backup

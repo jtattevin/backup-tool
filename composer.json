@@ -9,6 +9,7 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "symfony/clock": "^7.3",
         "symfony/config": "^7.3",
         "symfony/console": "^7.3",
         "symfony/dotenv": "^7.3",
