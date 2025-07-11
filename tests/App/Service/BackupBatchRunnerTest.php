@@ -68,7 +68,7 @@ class BackupBatchRunnerTest extends TestCase
         $output = explode("\n", $output);
         $output = array_map(trim(...), $output);
         $output = implode("\n", $output);
-        $output = preg_replace("#-{10,}#", "-----------", $output);
+        $output = preg_replace('#-{10,}#', '-----------', $output);
 
         self::assertEquals(
             file_get_contents(__FILE__, offset: __COMPILER_HALT_OFFSET__),
