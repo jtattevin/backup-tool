@@ -41,8 +41,8 @@ class RunBackup extends Command
 
         try {
             $configPath = $input->getArgument('configPath');
-            $workdir    = dirname($configPath);
-            $dryRun     = $input->getOption('dry-run');
+            $workdir = dirname($configPath);
+            $dryRun = $input->getOption('dry-run');
 
             $this->configFilenameValidator->validate($configPath);
 

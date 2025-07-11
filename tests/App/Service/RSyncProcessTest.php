@@ -16,16 +16,16 @@ class RSyncProcessTest extends TestCase
     public static function dataProviderTestExecute(): \Generator
     {
         yield [
-            "from" => dirname(__DIR__, 3) . "/example/from",
-            "to"   => dirname(__DIR__, 3) . "/example/to",
+            'from' => dirname(__DIR__, 3) . '/example/from',
+            'to'   => dirname(__DIR__, 3) . '/example/to',
         ];
         yield [
-            "from" => __DIR__ . "/../../../example/from",
-            "to"   => __DIR__ . "/../../../example/to",
+            'from' => __DIR__ . '/../../../example/from',
+            'to'   => __DIR__ . '/../../../example/to',
         ];
     }
 
-    #[DataProvider("dataProviderTestExecute")]
+    #[DataProvider('dataProviderTestExecute')]
     public function testExecute(string $from, string $to): void
     {
         $processRunner = $this->createMock(ProcessRunner::class);
@@ -34,14 +34,14 @@ class RSyncProcessTest extends TestCase
             ->method('startProcess')
             ->willReturnCallback(function (array|string $script, string $outputPath, string $workdir, OutputStyle $output, bool $dryRun) use ($from, $to) {
                 self::assertEquals([
-                    "rsync",
+                    'rsync',
                     '--archive',
                     '--verbose',
-                    '--files-from=' . dirname(__DIR__, 3) . "/example/from/.backups/included.txt",
+                    '--files-from=' . dirname(__DIR__, 3) . '/example/from/.backups/included.txt',
                     $from,
                     $to,
                 ], $script);
-                self::assertEquals("", $outputPath);
+                self::assertEquals('', $outputPath);
                 self::assertEquals(__DIR__, $workdir);
                 self::assertTrue($dryRun);
 
@@ -51,54 +51,51 @@ class RSyncProcessTest extends TestCase
         $rsyncProcess = new RSyncProcess($processRunner);
 
         $backup = new BackupFolder([
-            "from"       => $from,
-            "to"         => $to,
-            "configName" => "backup.yml",
+            'from'       => $from,
+            'to'         => $to,
+            'configName' => 'backup.yml',
         ]);
-        $backup->configure(["dump_scripts" => [], "ignore_pattern" => [], "ignore_folder" => [], "before_backup" => null, "during_backup" => null, "after_backup" => null,]);
+        $backup->configure(['dump_scripts' => [], 'ignore_pattern' => [], 'ignore_folder' => [], 'before_backup' => null, 'during_backup' => null, 'after_backup' => null]);
 
         $rsyncProcess->execute($backup, __DIR__, $this->createMock(OutputStyle::class), true);
     }
 
-    #[DataProvider("dataProviderTestExecute")]
+    #[DataProvider('dataProviderTestExecute')]
     public function testBuildFileList(string $from, string $to): void
     {
         $processRunner = $this->createMock(ProcessRunner::class);
         $rsyncProcess  = new RSyncProcess($processRunner);
 
         $backup = new BackupFolder([
-            "from"       => $from,
-            "to"         => $to,
-            "configName" => "backup.yml",
+            'from'       => $from,
+            'to'         => $to,
+            'configName' => 'backup.yml',
         ]);
         $backup->configure([
-            "dump_scripts"   => [],
-            "ignore_pattern" => [
-                "file2",
+            'dump_scripts'   => [],
+            'ignore_pattern' => [
+                'file2',
                 "#^dir1/.ile3\.txt$#",
                 "#^dir1/file4\.tx$#",
             ],
-            "ignore_folder"  => [
-                "dir2",
+            'ignore_folder'  => [
+                'dir2',
             ],
-            "before_backup"  => null,
-            "during_backup"  => null,
-            "after_backup"   => null,
+            'before_backup'  => null,
+            'during_backup'  => null,
+            'after_backup'   => null,
         ]);
         new Filesystem()->mkdir($backup->workDirPath);
 
         $rsyncProcess->execute($backup, __DIR__, $this->createMock(OutputStyle::class), true);
 
-        self::assertEquals(
-            <<<INCLUDED
-            .backups/output-script-A
-            file1.txt
-            dir1/dir2/file6.txt
-            dir1/dir2/file8.txt
-            dir1/file4.txt
-            INCLUDED,
-            file_get_contents($backup->includedListPath)
-        );
+        self::assertEqualsCanonicalizing([
+            ".backups/output-script-A",
+            "file1.txt",
+            "dir1/dir2/file6.txt",
+            "dir1/dir2/file8.txt",
+            "dir1/file4.txt",
+        ], explode("\n", file_get_contents($backup->includedListPath)));
 
         self::assertStringContainsString(
             <<<EXCLUDED

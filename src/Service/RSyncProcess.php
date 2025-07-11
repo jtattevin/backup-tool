@@ -20,10 +20,10 @@ readonly class RSyncProcess
         $output->title('Start copy');
 
         $this->buildFileList($backup);
-        $output->note('Included files list is in ' . $backup->includedListPath);
-        $output->note('Excluded files list is in ' . $backup->excludedListPath);
+        $output->note('Included files list is in '.$backup->includedListPath);
+        $output->note('Excluded files list is in '.$backup->excludedListPath);
 
-        if (!str_contains($backup->to, "://")) {
+        if (!str_contains($backup->to, '://')) {
             new Filesystem()->mkdir($backup->to);
         }
 
@@ -31,7 +31,7 @@ readonly class RSyncProcess
             'rsync',
             '--archive',
             '--verbose',
-            '--files-from=' . $backup->includedListPath,
+            '--files-from='.$backup->includedListPath,
             $backup->from,
             $backup->to,
         ];

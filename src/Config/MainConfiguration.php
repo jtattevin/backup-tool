@@ -27,7 +27,7 @@ readonly class MainConfiguration implements ConfigurationInterface
                             ->cannotBeEmpty()
                             ->beforeNormalization()
                                 ->ifString()
-                                ->then(fn (string $value): string =>realpath($value) ?: realpath($this->rootDir."/".$value) ?: $value)
+                                ->then(fn (string $value): string => realpath($value) ?: realpath($this->rootDir.'/'.$value) ?: $value)
                             ->end()
                             ->validate()
                                 ->ifTrue(fn ($value) => !is_dir($value))
