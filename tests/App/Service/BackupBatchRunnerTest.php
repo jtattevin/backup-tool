@@ -68,6 +68,7 @@ class BackupBatchRunnerTest extends TestCase
         $output = explode("\n", $output);
         $output = array_map(trim(...), $output);
         $output = implode("\n", $output);
+        $output = preg_replace("#-{10,}#", "-----------", $output);
 
         self::assertEquals(
             file_get_contents(__FILE__, offset: __COMPILER_HALT_OFFSET__),
@@ -78,7 +79,7 @@ class BackupBatchRunnerTest extends TestCase
 
 __halt_compiler();
 Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir1 using backup.yml
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------
 
 ! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
 
@@ -92,7 +93,7 @@ Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/t
 └── Date end : 2025-07-11 12:00:00
 
 Begin backup of {ROOTDIR}/example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir2 using backup-complete.yml
-------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------
 
 ! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
 
@@ -130,7 +131,7 @@ Running after backup scripts
 └── Date end : 2025-07-11 12:00:00
 
 Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir1 using backup.yml
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------
 
 ! [NOTE] Starting to log in {ROOTDIR}/example/from/.backups/log.txt
 
@@ -144,7 +145,7 @@ Begin backup of {ROOTDIR}/tests/App/Service/../../../example/from -> {ROOTDIR}/t
 └── Date end : 2025-07-11 12:00:00
 
 Begin backup of {ROOTDIR}/example/from -> {ROOTDIR}/tests/App/Service/../../../example/to/dir2 using backup-missing.yml
------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------
 
 [ERROR] File "{ROOTDIR}/example/from/backup-missing.yml" does not exist.
 
