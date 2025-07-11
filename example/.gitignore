@@ -1,3 +1,5 @@
 from/.backups/excluded.txt
 from/.backups/included.txt
+from/.backups/log.txt
+from/.backups/summary.txt
 to
