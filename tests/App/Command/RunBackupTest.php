@@ -3,8 +3,8 @@
 namespace Tests\App\Command;
 
 use App\Command\RunBackup;
-use App\Service\BackupBatchRunner;
 use App\DTO\BackupBatch;
+use App\Service\BackupBatchRunner;
 use App\Validator\ConfigFilenameValidator;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -39,15 +39,14 @@ class RunBackupTest extends TestCase
         self::assertEquals($expectedExitCode, $exitCode);
     }
 
-
-    #[TestWith(["from", 1])]
-    #[TestWith(["missingFolder", 0])]
+    #[TestWith(['from', 1])]
+    #[TestWith(['missingFolder', 0])]
     public function testRunFilter(string $filter, int $expectedRun): void
     {
         $output = new NullOutput();
         $input = new ArrayInput([
             'configPath' => dirname(__DIR__, 3).'/example/main.yml',
-            '--filter' => $filter
+            '--filter' => $filter,
         ]);
 
         $configFilenameValidator = $this->createMock(ConfigFilenameValidator::class);
@@ -57,8 +56,9 @@ class RunBackupTest extends TestCase
         $backupBatchRunner
             ->expects($this->once())
             ->method('executeBatch')
-            ->willReturnCallback(function(BackupBatch $backupBatch) use ($expectedRun) {
+            ->willReturnCallback(function (BackupBatch $backupBatch) use ($expectedRun) {
                 self::assertEquals($expectedRun, iterator_count($backupBatch));
+
                 return true;
             });
 
@@ -66,9 +66,6 @@ class RunBackupTest extends TestCase
         $command->configFilenameValidator = $configFilenameValidator;
         $command->backupBatchRunner = $backupBatchRunner;
         $exitCode = $command->run($input, $output);
-
-
-
     }
 
     public function testRunBackupValidationError()

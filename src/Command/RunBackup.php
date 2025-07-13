@@ -55,8 +55,8 @@ class RunBackup extends Command
                 ]
             );
 
-            if($filter !== null) {
-                $processedConfiguration = array_filter($processedConfiguration, static fn(array $config) => str_contains($config["from"], $filter));
+            if (null !== $filter) {
+                $processedConfiguration = array_filter($processedConfiguration, static fn (array $config) => str_contains($config['from'], $filter));
             }
             $backupBatch = new BackupBatch($processedConfiguration);
 
