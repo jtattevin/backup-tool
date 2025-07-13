@@ -31,6 +31,7 @@ class ProcessRunnerTest extends TestCase
         );
         $process->wait();
 
+        self::assertEquals(null, $process->getTimeout());
         self::assertEquals($expectedOutput, $output->fetch());
     }
 

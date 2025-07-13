@@ -1,0 +1,5 @@
+{
+	"name": "PHP",
+	"image": "mcr.microsoft.com/devcontainers/php:1-8.4-bookworm",
+	"postCreateCommand": "composer install"
+}

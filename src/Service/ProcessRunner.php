@@ -25,6 +25,7 @@ readonly class ProcessRunner
         } else {
             $process = new Process($script);
         }
+        $process->setTimeout(null);
         $process->setWorkingDirectory($workdir);
         $process->setEnv(['OUTPUT_PATH' => $outputPath]);
         $process->start(static fn ($type, $data) => match ($type) {
