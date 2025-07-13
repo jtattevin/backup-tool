@@ -33,6 +33,7 @@ class RunBackup extends Command
         parent::configure();
         $this->addArgument('configPath', InputArgument::REQUIRED);
         $this->addOption('dry-run', null, InputOption::VALUE_NONE);
+        $this->addOption('filter', null, InputOption::VALUE_REQUIRED);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -43,6 +44,7 @@ class RunBackup extends Command
             $configPath = $input->getArgument('configPath');
             $workdir = dirname($configPath);
             $dryRun = $input->getOption('dry-run');
+            $filter = $input->getOption('filter');
 
             $this->configFilenameValidator->validate($configPath);
 
@@ -53,6 +55,9 @@ class RunBackup extends Command
                 ]
             );
 
+            if (null !== $filter) {
+                $processedConfiguration = array_filter($processedConfiguration, static fn (array $config) => str_contains($config['from'], $filter));
+            }
             $backupBatch = new BackupBatch($processedConfiguration);
 
             if (!$this->backupBatchRunner->executeBatch($backupBatch, $workdir, $io, $dryRun)) {
